@@ -3,6 +3,14 @@
 ## [Unreleased]
 
 ### Added
+- Admin page for managing shoes (/admin)
+- API routes for creating and deleting shoes (/api/shoes)
+- Type definitions for shoe data structure
+- Form component for adding new shoes
+- List component for displaying and deleting shoes
+- Basic error handling and loading states
+
+### Added
 - Created initial API routes for shoe data
   - `/api/shoes/search` endpoint for filtering shoes
   - Basic search functionality implementation
