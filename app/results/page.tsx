@@ -3,35 +3,51 @@
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import type { Shoe } from "@/types/shoe"
-import { shoesData } from "@/data/shoes"
 import ShoeCard from "@/components/shoe-card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
+import { getShoesByFilters } from "@/services/shoe-service"
 
 export default function ResultsPage() {
   const searchParams = useSearchParams()
   const [matchedShoes, setMatchedShoes] = useState<Shoe[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const primaryUse = searchParams.get("primaryUse")
-    const distance = searchParams.get("distance")
-    const support = searchParams.get("support")
-    const stack = searchParams.get("stack")
+    const fetchShoes = async () => {
+      setLoading(true)
+      
+      const primaryUse = searchParams.get("primaryUse") || undefined
+      const distance = searchParams.get("distance") || undefined
+      const support = searchParams.get("support") || undefined
+      const stack = searchParams.get("stack") || undefined
 
-    // Filter shoes based on criteria
-    const filteredShoes = shoesData.filter((shoe) => {
-      // If "not sure" is selected, don't filter by that criterion
-      const matchesPrimaryUse = primaryUse ? shoe.primaryUse.includes(primaryUse) : true
-      const matchesDistance = distance ? shoe.distance.includes(distance) : true
-      const matchesSupport = support === "not sure" ? true : support ? shoe.support === support : true
-      const matchesStack = stack === "not sure" ? true : stack ? shoe.stack === stack : true
+      try {
+        const shoes = await getShoesByFilters({
+          primaryUse,
+          distance,
+          support,
+          stack
+        })
+        setMatchedShoes(shoes)
+      } catch (error) {
+        console.error("Error fetching shoes:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-      return matchesPrimaryUse && matchesDistance && matchesSupport && matchesStack
-    })
-
-    setMatchedShoes(filteredShoes)
+    fetchShoes()
   }, [searchParams])
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-12 text-center">
+        <p>Finding your perfect shoes...</p>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -64,4 +80,3 @@ export default function ResultsPage() {
     </div>
   )
 }
-
