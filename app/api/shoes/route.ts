@@ -1,10 +1,16 @@
 import { shoesData } from '@/data/shoes'
 import { NextResponse } from 'next/server'
 import { Shoe } from '@/types/shoe'
+import { getServerSession } from 'next-auth'
 
 // Create a mutable copy of the shoes data
 // In a real app, this would be replaced with a database
 let shoes = [...shoesData]
+
+async function isAuthenticated() {
+  const session = await getServerSession()
+  return !!session
+}
 
 // GET handler - Returns all shoes
 export async function GET() {
@@ -20,6 +26,9 @@ export async function GET() {
 
 // POST handler - Creates a new shoe
 export async function POST(request: Request) {
+  if (!await isAuthenticated()) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   try {
     // Parse the incoming request body
     const shoe: Partial<Shoe> = await request.json()
@@ -60,6 +69,9 @@ export async function POST(request: Request) {
 
 // DELETE handler - Removes a shoe
 export async function DELETE(request: Request) {
+  if (!await isAuthenticated()) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   try {
     const { id } = await request.json()
 
@@ -77,6 +89,40 @@ export async function DELETE(request: Request) {
   } catch (error) {
     return NextResponse.json(
       { error: 'Failed to delete shoe' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function PUT(request: Request) {
+  if (!await isAuthenticated()) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  try {
+    const shoe: Shoe = await request.json()
+    
+    if (!shoe.id) {
+      return NextResponse.json(
+        { error: 'Shoe ID is required' },
+        { status: 400 }
+      )
+    }
+
+    // Find and update the shoe
+    const index = shoes.findIndex(s => s.id === shoe.id)
+    if (index === -1) {
+      return NextResponse.json(
+        { error: 'Shoe not found' },
+        { status: 404 }
+      )
+    }
+
+    shoes[index] = shoe
+    return NextResponse.json(shoe)
+  } catch (error) {
+    console.error('PUT Error:', error)
+    return NextResponse.json(
+      { error: 'Failed to update shoe' },
       { status: 500 }
     )
   }

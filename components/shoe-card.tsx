@@ -1,8 +1,8 @@
 import Image from "next/image"
-import type { Shoe } from "@/types/shoe"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import type { Shoe } from "../types/shoe"
+import { Badge } from "../components/ui/badge"
+import { Button } from "../components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card"
 import { ExternalLink } from "lucide-react"
 
 interface ShoeCardProps {
